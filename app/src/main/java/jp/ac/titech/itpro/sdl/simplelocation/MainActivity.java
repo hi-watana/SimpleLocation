@@ -2,6 +2,8 @@ package jp.ac.titech.itpro.sdl.simplelocation;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,6 +21,10 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -34,6 +40,20 @@ public class MainActivity extends AppCompatActivity implements
             Manifest.permission.ACCESS_FINE_LOCATION
     };
     private final static int REQCODE_PERMISSIONS = 1111;
+
+    private String getAddress(double latitude, double longitude) {
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        List<Address> addresses = null;
+        StringBuilder result = new StringBuilder();
+
+        try {
+            addresses = geocoder.getFromLocation(latitude, longitude, 1);
+        } catch (IOException e) {
+            return "";
+        }
+        Address address = addresses.get(0);
+        return address.toString();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements
                     @Override
                     public void onSuccess(Location location) {
                         latLongView.setText(getString(R.string.latlong_format,
-                                location.getLatitude(), location.getLongitude()));
+                                getAddress(location.getLatitude(), location.getLongitude())));
                     }
                 });
     }
